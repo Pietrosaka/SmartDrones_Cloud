@@ -1,0 +1,176 @@
+@page
+@model SmartDrones.Web.Pages.AlertsModel
+@using SmartDrones.Web.Models
+@using SmartDrones.Web.Services
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Microsoft.Extensions.Logging
+@inject IAlertApiService AlertApiService
+@inject IDroneApiService DroneApiService
+@inject ILogger<SmartDrones.Web.Pages.AlertsModel> Logger
+
+@{
+    ViewData["Title"] = "Gerenciar Alertas";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Gerenciar Alertas</h1>
+    <p>Visualize e gerencie os alertas dos drones.</p>
+</div>
+
+<div class="container mt-4">
+
+    @if (Model.EditedAlert.Id > 0)
+    {
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-white">
+                <h3>Editar Alerta (ID: @Model.EditedAlert.Id)</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="EditedAlert.Id" />
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedAlert.DroneId" class="control-label"></label>
+                        <select asp-for="EditedAlert.DroneId" class="form-control" asp-items="@(new SelectList(Model.Drones, "Id", "Identifier"))">
+                            <option value="">Selecione um Drone</option>
+                        </select>
+                        <span asp-validation-for="EditedAlert.DroneId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedAlert.Message" class="control-label"></label>
+                        <input asp-for="EditedAlert.Message" class="form-control" />
+                        <span asp-validation-for="EditedAlert.Message" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedAlert.RiskLevel" class="control-label"></label>
+                        <select asp-for="EditedAlert.RiskLevel" class="form-control" asp-items="Html.GetEnumSelectList<RiskLevel>()"></select>
+                        <span asp-validation-for="EditedAlert.RiskLevel" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedAlert.Latitude" class="control-label"></label>
+                        <input asp-for="EditedAlert.Latitude" class="form-control" />
+                        <span asp-validation-for="EditedAlert.Latitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedAlert.Longitude" class="control-label"></label>
+                        <input asp-for="EditedAlert.Longitude" class="form-control" />
+                        <span asp-validation-for="EditedAlert.Longitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3 form-check">
+                        <input asp-for="EditedAlert.IsResolved" type="checkbox" class="form-check-input" />
+                        <label asp-for="EditedAlert.IsResolved" class="form-check-label"></label>
+                        <span asp-validation-for="EditedAlert.IsResolved" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Salvar Edição" class="btn btn-warning" />
+                        <a asp-page="./Alerts" class="btn btn-secondary">Cancelar Edição</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Criar Novo Alerta</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewAlert.DroneId" class="control-label"></label>
+                        <select asp-for="NewAlert.DroneId" class="form-control" asp-items="@(new SelectList(Model.Drones, "Id", "Identifier"))">
+                            <option value="">Selecione um Drone</option>
+                        </select>
+                        <span asp-validation-for="NewAlert.DroneId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewAlert.Message" class="control-label"></label>
+                        <input asp-for="NewAlert.Message" class="form-control" />
+                        <span asp-validation-for="NewAlert.Message" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewAlert.RiskLevel" class="control-label"></label>
+                        <select asp-for="NewAlert.RiskLevel" class="form-control" asp-items="Html.GetEnumSelectList<RiskLevel>()"></select>
+                        <span asp-validation-for="NewAlert.RiskLevel" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewAlert.Latitude" class="control-label"></label>
+                        <input asp-for="NewAlert.Latitude" class="form-control" />
+                        <span asp-validation-for="NewAlert.Latitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewAlert.Longitude" class="control-label"></label>
+                        <input asp-for="NewAlert.Longitude" class="form-control" />
+                        <span asp-validation-for="NewAlert.Longitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3 form-check">
+                        <input asp-for="NewAlert.IsResolved" type="checkbox" class="form-check-input" />
+                        <label asp-for="NewAlert.IsResolved" class="form-check-label"></label>
+                        <span asp-validation-for="NewAlert.IsResolved" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Adicionar Alerta" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <h2>Alertas Registrados</h2>
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    @if (Model.Alerts != null && Model.Alerts.Any())
+    {
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Drone</th>
+                    <th>Mensagem</th>
+                    <th>Risco</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Resolvido</th>
+                    <th>Timestamp</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var alert in Model.Alerts.OrderByDescending(a => a.Timestamp))
+                {
+                    <tr>
+                        <td>@alert.Id</td>
+                        <td>@(Model.Drones?.FirstOrDefault(d => d.Id == alert.DroneId)?.Identifier ?? "N/A")</td>
+                        <td>@alert.Message</td>
+                        <td>@alert.RiskLevel</td>
+                        <td>@alert.Latitude</td>
+                        <td>@alert.Longitude</td>
+                        <td>@(alert.IsResolved ? "Sim" : "Não")</td>
+                        <td>@(alert.Timestamp.HasValue ? alert.Timestamp.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss") : "")</td>
+                        <td>
+                            <a asp-page="./Alerts" asp-route-editId="@alert.Id" class="btn btn-warning btn-sm">Editar</a>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@alert.Id" onsubmit="return confirm('Tem certeza que deseja excluir o alerta ID @alert.Id?');" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Nenhum alerta encontrado.</p>
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

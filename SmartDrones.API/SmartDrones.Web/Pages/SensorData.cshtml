@@ -1,0 +1,187 @@
+@page
+@model SmartDrones.Web.Pages.SensorDataModel
+@using SmartDrones.Web.Models
+@using SmartDrones.Web.Services
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Microsoft.Extensions.Logging
+@inject ISensorDataApiService SensorDataApiService
+@inject IDroneApiService DroneApiService
+@inject ILogger<SmartDrones.Web.Pages.SensorDataModel> Logger
+
+@{
+    ViewData["Title"] = "Gerenciar Dados de Sensor";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Gerenciar Dados de Sensor</h1>
+    <p>Visualize e gerencie os dados dos sensores.</p>
+</div>
+
+<div class="container mt-4">
+
+    @if (Model.EditedSensorData.Id > 0)
+    {
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-white">
+                <h3>Editar Dados de Sensor (ID: @Model.EditedSensorData.Id)</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="EditedSensorData.Id" />
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedSensorData.DroneId" class="control-label"></label>
+                        <select asp-for="EditedSensorData.DroneId" class="form-control" asp-items="@(new SelectList(Model.Drones, "Id", "Identifier"))">
+                            <option value="">Selecione um Drone</option>
+                        </select>
+                        <span asp-validation-for="EditedSensorData.DroneId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedSensorData.Temperature" class="control-label"></label>
+                        <input asp-for="EditedSensorData.Temperature" class="form-control" type="number" step="0.1" />
+                        <span asp-validation-for="EditedSensorData.Temperature" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedSensorData.Humidity" class="control-label"></label>
+                        <input asp-for="EditedSensorData.Humidity" class="form-control" type="number" step="0.1" />
+                        <span asp-validation-for="EditedSensorData.Humidity" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedSensorData.Luminosity" class="control-label"></label>
+                        <input asp-for="EditedSensorData.Luminosity" class="form-control" type="number" step="0.1" />
+                        <span asp-validation-for="EditedSensorData.Luminosity" class="text-danger"></span>
+                    </div>
+                    <div class="form-group form-check mb-3">
+                        <input class="form-check-input" asp-for="EditedSensorData.SmokeDetected" />
+                        <label class="form-check-label" asp-for="EditedSensorData.SmokeDetected"></label>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedSensorData.Latitude" class="control-label"></label>
+                        <input asp-for="EditedSensorData.Latitude" class="form-control" type="number" step="0.000001" />
+                        <span asp-validation-for="EditedSensorData.Latitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedSensorData.Longitude" class="control-label"></label>
+                        <input asp-for="EditedSensorData.Longitude" class="form-control" type="number" step="0.000001" />
+                        <span asp-validation-for="EditedSensorData.Longitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Salvar Edição" class="btn btn-warning" />
+                        <a asp-page="./SensorData" class="btn btn-secondary">Cancelar Edição</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Criar Novo Dado de Sensor</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewSensorData.DroneId" class="control-label"></label>
+                        <select asp-for="NewSensorData.DroneId" class="form-control" asp-items="@(new SelectList(Model.Drones, "Id", "Identifier"))">
+                            <option value="">Selecione um Drone</option>
+                        </select>
+                        <span asp-validation-for="NewSensorData.DroneId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewSensorData.Temperature" class="control-label"></label>
+                        <input asp-for="NewSensorData.Temperature" class="form-control" type="number" step="0.1" />
+                        <span asp-validation-for="NewSensorData.Temperature" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewSensorData.Humidity" class="control-label"></label>
+                        <input asp-for="NewSensorData.Humidity" class="form-control" type="number" step="0.1" />
+                        <span asp-validation-for="NewSensorData.Humidity" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewSensorData.Luminosity" class="control-label"></label>
+                        <input asp-for="NewSensorData.Luminosity" class="form-control" type="number" step="0.1" />
+                        <span asp-validation-for="NewSensorData.Luminosity" class="text-danger"></span>
+                    </div>
+                    <div class="form-group form-check mb-3">
+                        <input class="form-check-input" asp-for="NewSensorData.SmokeDetected" />
+                        <label class="form-check-label" asp-for="NewSensorData.SmokeDetected"></label>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewSensorData.Latitude" class="control-label"></label>
+                        <input asp-for="NewSensorData.Latitude" class="form-control" type="number" step="0.000001" />
+                        <span asp-validation-for="NewSensorData.Latitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewSensorData.Longitude" class="control-label"></label>
+                        <input asp-for="NewSensorData.Longitude" class="form-control" type="number" step="0.000001" />
+                        <span asp-validation-for="NewSensorData.Longitude" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Adicionar Dado" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+
+    <h2>Dados de Sensor Registrados</h2>
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    @if (Model.SensorDataList != null && Model.SensorDataList.Any())
+    {
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Drone</th>
+                    <th>Temperatura (°C)</th>
+                    <th>Umidade (%)</th>
+                    <th>Luminosidade</th>
+                    <th>Fumaça Detectada</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Timestamp</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var sensorData in Model.SensorDataList.OrderByDescending(s => s.Timestamp))
+                {
+                    <tr>
+                        <td>@sensorData.Id</td>
+                        <td>@(Model.Drones?.FirstOrDefault(d => d.Id == sensorData.DroneId)?.Identifier ?? "N/A")</td>
+                        <td>@sensorData.Temperature.ToString("F1")</td>
+                        <td>@sensorData.Humidity.ToString("F1")</td>
+                        <td>@sensorData.Luminosity.ToString("F1")</td>
+                        <td>@(sensorData.SmokeDetected ? "Sim" : "Não")</td>
+                        <td>@sensorData.Latitude.ToString("F6")</td>
+                        <td>@sensorData.Longitude.ToString("F6")</td>
+                        <td>@sensorData.Timestamp.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")</td>
+                        <td>
+                            <a asp-page="./SensorData" asp-route-editId="@sensorData.Id" class="btn btn-warning btn-sm">Editar</a>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@sensorData.Id" onsubmit="return confirm('Tem certeza que deseja excluir o dado de sensor ID @sensorData.Id?');" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Nenhum dado de sensor encontrado.</p>
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

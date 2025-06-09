@@ -1,0 +1,133 @@
+﻿@page
+@model SmartDrones.Web.Pages.IndexModel
+@using SmartDrones.Web.Models
+@using SmartDrones.Web.Services
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Microsoft.Extensions.Logging
+@inject IDroneApiService DroneApiService
+@inject ILogger<SmartDrones.Web.Pages.IndexModel> Logger
+
+@{
+    ViewData["Title"] = "Gerenciar Drones";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Gerenciar Drones</h1>
+    <p>Crie, visualize, edite e exclua drones.</p>
+</div>
+
+<div class="container mt-4">
+
+    @if (Model.EditedDrone.Id > 0)
+    {
+        <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-white">
+                <h3>Editar Drone (ID: @Model.EditedDrone.Id)</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="EditedDrone.Id" />
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedDrone.Identifier" class="control-label"></label>
+                        <input asp-for="EditedDrone.Identifier" class="form-control" />
+                        <span asp-validation-for="EditedDrone.Identifier" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedDrone.Model" class="control-label"></label>
+                        <input asp-for="EditedDrone.Model" class="form-control" />
+                        <span asp-validation-for="EditedDrone.Model" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="EditedDrone.Status" class="control-label"></label>
+                        <input asp-for="EditedDrone.Status" class="form-control" />
+                        <span asp-validation-for="EditedDrone.Status" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Salvar Edição" class="btn btn-warning" />
+                        <a asp-page="./Index" class="btn btn-secondary">Cancelar Edição</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Criar Novo Drone</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewDrone.Identifier" class="control-label"></label>
+                        <input asp-for="NewDrone.Identifier" class="form-control" />
+                        <span asp-validation-for="NewDrone.Identifier" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewDrone.Model" class="control-label"></label>
+                        <input asp-for="NewDrone.Model" class="form-control" />
+                        <span asp-validation-for="NewDrone.Model" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NewDrone.Status" class="control-label"></label>
+                        <input asp-for="NewDrone.Status" class="form-control" />
+                        <span asp-validation-for="NewDrone.Status" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Adicionar Drone" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <h2>Drones Registrados</h2>
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @Model.ErrorMessage
+        </div>
+    }
+    @if (Model.Drones != null && Model.Drones.Any())
+    {
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Identificador</th>
+                    <th>Modelo</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var drone in Model.Drones)
+                {
+                    <tr>
+                        <td>@drone.Id</td>
+                        <td>@drone.Identifier</td>
+                        <td>@drone.Model</td>
+                        <td>@drone.Status</td>
+                        <td>
+                            <a asp-page="./Index" asp-route-editId="@drone.Id" class="btn btn-warning btn-sm">Editar</a>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@drone.Id" onsubmit="return confirm('Tem certeza que deseja excluir o drone ID @drone.Id?');" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Nenhum drone encontrado.</p>
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
