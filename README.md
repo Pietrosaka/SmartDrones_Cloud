@@ -1,3 +1,4 @@
+
 # 📦 API de Drones (.NET 8 + MySQL em Containers)
 
 Este projeto é uma API RESTful desenvolvida em .NET 8 para o gerenciamento de drones. A aplicação realiza operações completas de CRUD (Create, Read, Update, Delete) e utiliza um banco de dados MySQL em container com persistência de dados.
@@ -16,12 +17,12 @@ Este repositório contém tudo o que é necessário para você rodar o projeto e
 
 ## ✅ Requisitos Atendidos
 
-- [x] API em .NET com CRUD completo
-- [x] Dockerfile personalizado (usuário não-root, diretório de trabalho, variáveis de ambiente)
-- [x] Aplicação exposta em uma porta configurável
-- [x] Container do MySQL com volume, variáveis de ambiente e porta exposta
-- [x] Banco de dados diferente do H2
-- [x] Testes de CRUD com arquivos JSON
+- [x] API em .NET com CRUD completo  
+- [x] Dockerfile personalizado (usuário não-root, diretório de trabalho, variáveis de ambiente)  
+- [x] Aplicação exposta em uma porta configurável  
+- [x] Container do MySQL com volume, variáveis de ambiente e porta exposta  
+- [x] Banco de dados diferente do H2  
+- [x] Testes de CRUD com arquivos JSON  
 
 ---
 
@@ -43,31 +44,43 @@ docker run -d \
   -v mysql_data:/var/lib/mysql \
   -p 3306:3306 \
   mysql:8.0
-🐳 2. Build da Imagem da Aplicação .NET
+```
+
+### 🐳 2. Build da Imagem da Aplicação .NET
+
 Em seguida, construa a imagem Docker da sua aplicação .NET. Certifique-se de estar na raiz do projeto onde o Dockerfile está localizado.
 
-Bash
-
+```bash
 docker build -t smartdrones-api .
-🚀 3. Execução do Container da Aplicação
+```
+
+### 🚀 3. Execução do Container da Aplicação
+
 Após o build da imagem, execute o container da sua API. Assegure-se de que a string de conexão esteja configurada corretamente para apontar para o container MySQL.
 
-Bash
-
+```bash
 docker run -d \
   --name smartdrones-api \
   -e ConnectionStrings__DefaultConnection="Server=host.docker.internal;Port=3306;Database=meubanco;User=meuusuario;Password=senha123;" \
   -p 5000:5000 \
   smartdrones-api
-📝 Observações Importantes
-Certifique-se de que as portas 3306 (MySQL) e 5000 (aplicação .NET) estejam disponíveis em sua máquina.
-Não é necessário docker-compose; os containers são executados individualmente com comandos docker run.
-Para verificar os logs da aplicação e depurar possíveis problemas, use o comando:
-Bash
+```
 
+---
+
+### 📝 Observações Importantes
+
+- Certifique-se de que as portas 3306 (MySQL) e 5000 (aplicação .NET) estejam disponíveis em sua máquina.  
+- Não é necessário usar `docker-compose`; os containers são executados individualmente com comandos `docker run`.  
+- Para verificar os logs da aplicação e depurar possíveis problemas, use o comando:
+
+```bash
 docker logs smartdrones-api
-Se precisar parar e remover os containers, use:
-Bash
+```
 
+- Se precisar parar e remover os containers, use:
+
+```bash
 docker stop smartdrones-api mysql-container
 docker rm smartdrones-api mysql-container
+```
